@@ -29,9 +29,11 @@ avg_sound_per_manufacturer['count'] = avg_sound_per_manufacturer['manufacturer']
 # Selecteer de top 20 luidste fabrikanten
 top_manufacturers = avg_sound_per_manufacturer.head(20)
 
-# Bepaal de minimum en maximum waarde van lasmax_dB in de dataset
-min_lasmax = top_manufacturers['lasmax_dB'].min()
-max_lasmax = top_manufacturers['lasmax_dB'].max()
+# Bereken de minimale en maximale waarde per fabrikant
+min_max_per_manufacturer = filtered_data.groupby('manufacturer')['lasmax_dB'].agg(['min', 'max']).reset_index()
+
+# Voeg de minimale en maximale waarden toe aan de top_manufacturers dataframe
+top_manufacturers = top_manufacturers.merge(min_max_per_manufacturer[['manufacturer', 'min', 'max']], on='manufacturer')
 
 # Maak een interactieve barplot met Plotly
 fig = px.bar(top_manufacturers, 
@@ -59,18 +61,18 @@ fig.update_layout(
 )
 
 # Stel de x-as in voor een beter verschil
-fig.update_xaxes(range=[min_lasmax - 1, max_lasmax + 1], tickmode='array')  # Vergroot het bereik met 1 dB om de verschillen duidelijker te maken
+fig.update_xaxes(range=[top_manufacturers['min'].min() - 1, top_manufacturers['max'].max() + 1], tickmode='array')  # Vergroot het bereik met 1 dB om de verschillen duidelijker te maken
 
-# Voeg de minimum en maximum waarde toe aan de grafiek als tekst
-fig.add_annotation(
-    x=min_lasmax, y=0, xref="x", yref="paper", 
-    text=f"Min: {min_lasmax:.2f} dB", showarrow=True, arrowhead=2
-)
-
-fig.add_annotation(
-    x=max_lasmax, y=0, xref="x", yref="paper", 
-    text=f"Max: {max_lasmax:.2f} dB", showarrow=True, arrowhead=2
-)
+# Voeg de min en max waarden per fabrikant toe als tekst boven de bars
+for i, row in top_manufacturers.iterrows():
+    fig.add_annotation(
+        x=row['min'], y=i, xref="x", yref="y", 
+        text=f"Min: {row['min']:.2f} dB", showarrow=False, font=dict(size=10, color="blue")
+    )
+    fig.add_annotation(
+        x=row['max'], y=i, xref="x", yref="y", 
+        text=f"Max: {row['max']:.2f} dB", showarrow=False, font=dict(size=10, color="red")
+    )
 
 # Toon de grafiek in de Streamlit interface
 st.plotly_chart(fig)
