@@ -148,27 +148,6 @@ plt.xticks(rotation=45)
 
 # Toon de grafiek in Streamlit
 st.pyplot(plt)
-# Neem alleen de eerste woordgroep (eerste woord) van de type-kolom
-data['manufacturer'] = data['type'].str.split().str[0]
-
-# Tel het aantal waarnemingen per fabrikant
-manufacturer_counts = data['manufacturer'].value_counts()
-
-# Filter alleen de fabrikanten die meer dan 5 keer zijn waargenomen
-valid_manufacturers = manufacturer_counts[manufacturer_counts > 5].index
-
-# Filter de dataset op de fabrikanten die meer dan 5 keer zijn waargenomen
-filtered_data = data[data['manufacturer'].isin(valid_manufacturers)]
-
-# Bereken het gemiddelde geluidsniveau per fabrikant
-avg_sound_per_manufacturer = filtered_data.groupby('manufacturer')['lasmax_dB'].mean().sort_values(ascending=False).reset_index()
-
-# Voeg het aantal waarnemingen per fabrikant toe aan de dataset
-avg_sound_per_manufacturer['count'] = avg_sound_per_manufacturer['manufacturer'].map(manufacturer_counts)
-
-# Selecteer de top 20 luidste fabrikanten
-top_manufacturers = avg_sound_per_manufacturer.head(20)
-
 # Maak een interactieve barplot met Plotly
 fig = px.bar(top_manufacturers, 
              x='lasmax_dB', 
@@ -194,5 +173,5 @@ fig.update_layout(
     font=dict(size=12)  # Verklein het lettertype van de labels om ze beter leesbaar te maken
 )
 
-# Toon de grafiek
-fig.show()
+# Toon de grafiek in Streamlit
+st.plotly_chart(fig)
