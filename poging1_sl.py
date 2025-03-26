@@ -1,9 +1,14 @@
+import streamlit as st
 import plotly.express as px
 import pandas as pd
 
+# Titel van de Streamlit app
+st.title("Luidste Vliegtuigfabrikanten Analyse")
+
+# Laad de dataset
 data = pd.read_csv('data_klein.csv')
 
-# Neem alleen de eerste woordgroep (eerste woord) van de type-kolom
+# Voeg een nieuwe kolom 'manufacturer' toe met de eerste woordgroep uit 'type'
 data['manufacturer'] = data['type'].str.split().str[0]
 
 # Tel het aantal waarnemingen per fabrikant
@@ -49,5 +54,5 @@ fig.update_layout(
     font=dict(size=12)  # Verklein het lettertype van de labels om ze beter leesbaar te maken
 )
 
-# Toon de grafiek
-fig.show()
+# Toon de grafiek in de Streamlit interface
+st.plotly_chart(fig)
