@@ -1,6 +1,8 @@
 import plotly.express as px
 import pandas as pd
 
+data = pd.read_csv('data_klein.csv')
+
 # Neem alleen de eerste woordgroep (eerste woord) van de type-kolom
 data['manufacturer'] = data['type'].str.split().str[0]
 
