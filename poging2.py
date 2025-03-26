@@ -1,5 +1,6 @@
 import streamlit as st
 import plotly.express as px
+import plotly.graph_objects as go
 import pandas as pd
 
 # Titel van de Streamlit app
@@ -35,14 +36,37 @@ min_max_per_manufacturer = filtered_data.groupby('manufacturer')['lasmax_dB'].ag
 # Voeg de minimale en maximale waarden toe aan de top_manufacturers dataframe
 top_manufacturers = top_manufacturers.merge(min_max_per_manufacturer[['manufacturer', 'min', 'max']], on='manufacturer')
 
-# Maak een interactieve barplot met Plotly
-fig = px.bar(top_manufacturers, 
-             x='lasmax_dB', 
-             y='manufacturer', 
-             hover_data={'manufacturer': True, 'count': True, 'lasmax_dB': True}, 
-             labels={'lasmax_dB': 'Gemiddelde lasmax_dB (dB)', 'manufacturer': 'Fabrikant'},
-             title="Top 20 Luidste Vliegtuigfabrikanten (gemiddeld lasmax_dB)",
-             orientation='h')
+# Maak een lege figuur aan voor de grafiek
+fig = go.Figure()
+
+# Voeg de balken voor de gemiddelde 'lasmax_dB' toe
+fig.add_trace(go.Bar(
+    x=top_manufacturers['lasmax_dB'],
+    y=top_manufacturers['manufacturer'],
+    orientation='h',
+    name='Gemiddelde lasmax_dB',
+    marker=dict(color='royalblue'),
+))
+
+# Voeg de staven voor de minimale 'lasmax_dB' toe
+fig.add_trace(go.Bar(
+    x=top_manufacturers['min'],
+    y=top_manufacturers['manufacturer'],
+    orientation='h',
+    name='Minimale lasmax_dB',
+    marker=dict(color='orange'),
+    width=0.4  # Maak de staven iets smaller voor de min-waarden
+))
+
+# Voeg de staven voor de maximale 'lasmax_dB' toe
+fig.add_trace(go.Bar(
+    x=top_manufacturers['max'],
+    y=top_manufacturers['manufacturer'],
+    orientation='h',
+    name='Maximale lasmax_dB',
+    marker=dict(color='red'),
+    width=0.4  # Maak de staven iets smaller voor de max-waarden
+))
 
 # Pas de layout aan voor betere zichtbaarheid van labels en de x-as
 fig.update_layout(
@@ -50,8 +74,9 @@ fig.update_layout(
     margin={"l": 200, "r": 20, "t": 50, "b": 100},  # Vergroot de marge om ruimte te maken voor labels
     width=1000,  # Pas de breedte aan om de grafiek compacter te maken
     height=600,  # Pas de hoogte aan om de grafiek compacter te maken
-    xaxis_title='Gemiddelde lasmax_dB (dB)',  # Toevoegen van titel aan de x-as
+    xaxis_title='Geluidniveaus (dB)',  # Toevoegen van titel aan de x-as
     yaxis_title='Fabrikant',  # Toevoegen van titel aan de y-as
+    barmode='stack'  # Zorg ervoor dat de staven naast elkaar komen te staan
 )
 
 # Draai de y-as labels zodat ze beter leesbaar zijn
@@ -59,20 +84,6 @@ fig.update_layout(
     yaxis_tickangle=-45,  # Draai de y-as labels met -45 graden voor betere leesbaarheid
     font=dict(size=12)  # Verklein het lettertype van de labels om ze beter leesbaar te maken
 )
-
-# Stel de x-as in voor een beter verschil
-fig.update_xaxes(range=[top_manufacturers['min'].min() - 1, top_manufacturers['max'].max() + 1], tickmode='array')  # Vergroot het bereik met 1 dB om de verschillen duidelijker te maken
-
-# Voeg de min en max waarden per fabrikant toe als tekst boven de bars
-for i, row in top_manufacturers.iterrows():
-    fig.add_annotation(
-        x=row['min'], y=i, xref="x", yref="y", 
-        text=f"Min: {row['min']:.2f} dB", showarrow=False, font=dict(size=10, color="blue")
-    )
-    fig.add_annotation(
-        x=row['max'], y=i, xref="x", yref="y", 
-        text=f"Max: {row['max']:.2f} dB", showarrow=False, font=dict(size=10, color="red")
-    )
 
 # Toon de grafiek in de Streamlit interface
 st.plotly_chart(fig)
