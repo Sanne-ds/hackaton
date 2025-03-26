@@ -1,5 +1,5 @@
 requirements
-plotly
+plotly.express
 folium
 pandas
 matplotlib
