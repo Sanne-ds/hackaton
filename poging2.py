@@ -65,6 +65,10 @@ fig.update_layout(
     height=600,  # Pas de hoogte aan om de grafiek compacter te maken
     xaxis_title='Geluidniveaus (dB)',  # Toevoegen van titel aan de x-as
     yaxis_title='Fabrikant',  # Toevoegen van titel aan de y-as
+    showlegend=False,  # Verwijder de legenda aan de rechterkant
+    xaxis=dict(
+        range=[top_manufacturers['min'].min() - 5, top_manufacturers['max'].max() + 5]  # Stel de x-as limieten in zodat alles zichtbaar is
+    )
 )
 
 # Draai de y-as labels zodat ze beter leesbaar zijn
