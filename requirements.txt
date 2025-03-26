@@ -1,4 +1,8 @@
-requirements
-plotlyexpress
+plotly_express
 pandas
+streamlit
+pandas
+streamlit_folium
+seaborn
 matplotlib
+statsmodels
