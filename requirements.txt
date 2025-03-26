@@ -1,6 +1,4 @@
 requirements
 plotlyexpress
-folium
 pandas
 matplotlib
-seaborn
