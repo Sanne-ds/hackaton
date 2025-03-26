@@ -1,6 +1,10 @@
 import plotly.express as px
 import pandas as pd
 
+data= pd.read_csv('Sensornet_data_YTD.csv', sep=',')
+data = data.dropna(subset=['type'])
+data.head()
+
 # Neem alleen de eerste woordgroep (eerste woord) van de type-kolom
 data['manufacturer'] = data['type'].str.split().str[0]
 
