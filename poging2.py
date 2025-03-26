@@ -68,7 +68,10 @@ fig.update_layout(
     showlegend=False,  # Verwijder de legenda aan de rechterkant
     xaxis=dict(
         range=[top_manufacturers['min'].min() - 5, top_manufacturers['max'].max() + 5]  # Stel de x-as limieten in zodat alles zichtbaar is
-    )
+    ),
+    # Verwijder de widgets aan de rechterkant (sidebars of andere elementen)
+    paper_bgcolor='white',  # Achtergrondkleur instellen als wit
+    plot_bgcolor='white',  # Achtergrondkleur grafiek instellen als wit
 )
 
 # Draai de y-as labels zodat ze beter leesbaar zijn
@@ -79,3 +82,4 @@ fig.update_layout(
 
 # Toon de grafiek in de Streamlit interface
 st.plotly_chart(fig)
+
