@@ -1,5 +1,4 @@
 import streamlit as st
-import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 
@@ -39,34 +38,24 @@ top_manufacturers = top_manufacturers.merge(min_max_per_manufacturer[['manufactu
 # Maak een lege figuur aan voor de grafiek
 fig = go.Figure()
 
-# Voeg de balken voor de gemiddelde 'lasmax_dB' toe
-fig.add_trace(go.Bar(
-    x=top_manufacturers['lasmax_dB'],
-    y=top_manufacturers['manufacturer'],
-    orientation='h',
-    name='Gemiddelde lasmax_dB',
-    marker=dict(color='royalblue'),
-))
+# Voeg een enkele staaf toe die begint bij de minimum waarde en eindigt bij de maximum waarde
+for i, row in top_manufacturers.iterrows():
+    fig.add_trace(go.Scatter(
+        x=[row['min'], row['max']],  # x-waarden van de staaf (min naar max)
+        y=[row['manufacturer'], row['manufacturer']],  # y-waarden zijn constant (voor elke fabrikant)
+        mode='lines',  # Lijnmodus om een staaf te maken
+        line=dict(color='lightblue', width=6),  # Lichtblauwe lijn voor de staaf
+        name=row['manufacturer']
+    ))
 
-# Voeg de staven voor de minimale 'lasmax_dB' toe
-fig.add_trace(go.Bar(
-    x=top_manufacturers['min'],
-    y=top_manufacturers['manufacturer'],
-    orientation='h',
-    name='Minimale lasmax_dB',
-    marker=dict(color='orange'),
-    width=0.4  # Maak de staven iets smaller voor de min-waarden
-))
-
-# Voeg de staven voor de maximale 'lasmax_dB' toe
-fig.add_trace(go.Bar(
-    x=top_manufacturers['max'],
-    y=top_manufacturers['manufacturer'],
-    orientation='h',
-    name='Maximale lasmax_dB',
-    marker=dict(color='red'),
-    width=0.4  # Maak de staven iets smaller voor de max-waarden
-))
+    # Voeg een markering toe voor de gemiddelde waarde
+    fig.add_trace(go.Scatter(
+        x=[row['lasmax_dB']],  # x-positie van de markering
+        y=[row['manufacturer']],  # y-positie van de markering
+        mode='markers',  # Markeringen (punt)
+        marker=dict(color='blue', size=10, symbol='circle'),  # Markering in blauw
+        name=f"Gemiddeld: {row['manufacturer']}",
+    ))
 
 # Pas de layout aan voor betere zichtbaarheid van labels en de x-as
 fig.update_layout(
@@ -76,7 +65,6 @@ fig.update_layout(
     height=600,  # Pas de hoogte aan om de grafiek compacter te maken
     xaxis_title='Geluidniveaus (dB)',  # Toevoegen van titel aan de x-as
     yaxis_title='Fabrikant',  # Toevoegen van titel aan de y-as
-    barmode='stack'  # Zorg ervoor dat de staven naast elkaar komen te staan
 )
 
 # Draai de y-as labels zodat ze beter leesbaar zijn
