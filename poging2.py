@@ -1,5 +1,6 @@
 import streamlit as st
 import plotly.graph_objects as go
+import plotly.express as px
 import pandas as pd
 
 # Titel van de Streamlit app
@@ -130,6 +131,5 @@ fig.update_layout(
     yaxis={'tickmode': 'array'},  # Zorg ervoor dat de y-as met alle labels correct wordt weergegeven
 )
 
-
-# Toon de grafiek in de Streamlit interface
-st.plotly_chart(fig)
+# Toon de grafiek
+fig.show()
