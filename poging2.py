@@ -4,7 +4,7 @@ import plotly.express as px
 import pandas as pd
 
 # Titel van de Streamlit app
-st.title("Luidste Vliegtuigfabrikanten Analyse")
+st.title("Luidste Vliegtuigfabrikanten")
 
 # Laad de dataset
 data = pd.read_csv('data_klein.csv')
