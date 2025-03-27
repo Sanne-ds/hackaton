@@ -11,7 +11,7 @@ import seaborn as sns
 st.title("Hackaton")
 
 # Maak twee tabbladen
-tab1, tab2 = st.tabs(["Vliegtuigfabrikanten", "Tabblad 2"])
+tab1, tab2 = st.tabs(["Vliegtuigfabrikanten", "Passagiers en vracht"])
 
 # Inhoud voor Tabblad 1
 with tab1:
@@ -170,7 +170,6 @@ with tab1:
 
 # Inhoud voor Tabblad 2
 with tab2:
-   st.header("Marijn")
    # Cache de gegevensophaal functie om onnodige herhalingen van verzoeken te voorkomen
    @st.cache_data
    def fetch_data():
