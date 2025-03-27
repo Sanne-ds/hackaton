@@ -4,10 +4,10 @@ import plotly.express as px
 import pandas as pd
 
 # Titel van de Streamlit app
-st.title("Streamlit App met Twee Tabbladen")
+st.title("Hackaton")
 
 # Maak twee tabbladen
-tab1, tab2 = st.tabs(["Tabblad 1", "Tabblad 2"])
+tab1, tab2 = st.tabs(["Vliegtuigfabrikanten", "Tabblad 2"])
 
 # Inhoud voor Tabblad 1
 with tab1:
