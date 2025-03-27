@@ -10,6 +10,8 @@ data = pd.read_csv('data_klein.csv')
 
 # Voeg een nieuwe kolom 'manufacturer' toe met de eerste woordgroep uit 'type'
 data['manufacturer'] = data['type'].str.split().str[0]
+# Voeg een nieuwe kolom 'model' toe door het tweede woord uit de kolom 'type' te halen
+data['model'] = data['type'].str.split().str[1]
 
 # Tel het aantal waarnemingen per fabrikant
 manufacturer_counts = data['manufacturer'].value_counts()
@@ -149,4 +151,3 @@ fig.update_layout(
 
 # Toon de grafiek in de Streamlit interface
 st.plotly_chart(fig)
-
