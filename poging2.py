@@ -87,6 +87,10 @@ fig.update_layout(
 st.plotly_chart(fig)
 
 ######################################################################################
+import streamlit as st
+import pandas as pd
+import plotly.express as px
+
 # Filter de rijen waar 'boeing' in de 'type' kolom staat
 boeing_data = data[data['type'].str.contains('Boeing', case=False, na=False)]
 
@@ -94,13 +98,6 @@ boeing_data = data[data['type'].str.contains('Boeing', case=False, na=False)]
 boeing_data['model'] = boeing_data['type'].str.extract(r'(Boeing \d+)')
 
 # Groepeer nu op het nieuwe 'model' en bereken het gemiddelde geluidsniveau per model
-avg_sound_per_boeing_model = boeing_data.groupby('model')['lasmax_dB'].mean().sort_values(ascending=False).reset_index()
-
-# Toon de gefilterde en gegroepeerde data
-print(avg_sound_per_boeing_model)
-
-
-# Bereken gemiddelde, minimum en maximum per Boeing-model
 avg_sound_per_boeing_model = boeing_data.groupby('model')['lasmax_dB'].agg(['mean', 'min', 'max']).reset_index()
 
 # Hernoem kolommen voor duidelijkheid
@@ -119,17 +116,25 @@ fig = px.bar(avg_sound_per_boeing_model,
              y='model', 
              labels={'lasmax_dB': 'Gemiddeld Geluidsniveau (dB)', 'model': 'Boeing Model'},
              title="Gemiddeld Geluidsniveau per Groep Boeing Model",
-             orientation='h')
+             orientation='h',
+             error_x='error_x',
+             error_x_minus='error_x_minus')  # Voeg foutmarges toe aan de x-as
 
 # Pas de layout aan voor een betere weergave
 fig.update_layout(
-    width=800,  # Pas de breedte aan
+    width=1000,  # Vergroot de breedte van de grafiek
     height=600,  # Pas de hoogte aan
     margin={"l": 150, "r": 20, "t": 50, "b": 50},  # Voeg marges toe voor leesbaarheid
     xaxis_title='Gemiddeld Geluidsniveau (dB)',  # Titel voor de x-as
     yaxis_title='Boeing Model',  # Titel voor de y-as
     yaxis={'tickmode': 'array'},  # Zorg ervoor dat de y-as met alle labels correct wordt weergegeven
+    xaxis=dict(
+        tickformat='.1f',  # Toon de getallen op de x-as met 1 decimaal
+        showgrid=True,     # Zet de grid aan voor betere leesbaarheid
+        zeroline=True,     # Zet de lijn op nul
+    )
 )
 
+# Gebruik Streamlit om de grafiek weer te geven
 st.title("Gemiddeld Geluidsniveau per Boeing Model")
 st.plotly_chart(fig)
