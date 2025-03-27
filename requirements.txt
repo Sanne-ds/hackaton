@@ -8,3 +8,6 @@ seaborn
 matplotlib
 statsmodels
 numpy
+folium
+datetime
+pytz
