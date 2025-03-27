@@ -100,6 +100,22 @@ avg_sound_per_boeing_model['error_x_minus'] = avg_sound_per_boeing_model['lasmax
 # Controleer de nieuwe waarden
 print(avg_sound_per_boeing_model)
 
+# Bereken gemiddelde, minimum en maximum per Boeing-model
+avg_sound_per_boeing_model = boeing_data.groupby('model')['lasmax_dB'].agg(['mean', 'min', 'max']).reset_index()
+
+# Hernoem kolommen voor duidelijkheid
+avg_sound_per_boeing_model.columns = ['model', 'lasmax_dB', 'min_lasmax_dB', 'max_lasmax_dB']
+
+# Sorteer op gemiddeld geluidsniveau
+avg_sound_per_boeing_model = avg_sound_per_boeing_model.sort_values(by='lasmax_dB', ascending=False)
+
+# Bereken de foutmarges voor de error bars
+avg_sound_per_boeing_model['error_x'] = avg_sound_per_boeing_model['max_lasmax_dB'] - avg_sound_per_boeing_model['lasmax_dB']
+avg_sound_per_boeing_model['error_x_minus'] = avg_sound_per_boeing_model['lasmax_dB'] - avg_sound_per_boeing_model['min_lasmax_dB']
+
+# Controleer de nieuwe waarden
+print(avg_sound_per_boeing_model)
+
 # Maak een lege figuur aan voor de grafiek
 fig = go.Figure()
 
