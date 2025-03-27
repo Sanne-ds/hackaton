@@ -52,11 +52,11 @@ min_max_per_manufacturer = filtered_data.groupby('manufacturer')['lasmax_dB'].ag
 top_manufacturers = top_manufacturers.merge(min_max_per_manufacturer[['manufacturer', 'min', 'max']], on='manufacturer')
 
 # Maak een lege figuur aan voor de grafiek
-fig1 = go.Figure()
+figa = go.Figure()
 
 # Voeg een enkele staaf toe die begint bij de minimum waarde en eindigt bij de maximum waarde
 for i, row in top_manufacturers.iterrows():
-    fig.add_trace(go.Scatter(
+    figa.add_trace(go.Scatter(
         x=[row['min'], row['max']],  # x-waarden van de staaf (min naar max)
         y=[row['manufacturer'], row['manufacturer']],  # y-waarden zijn constant (voor elke fabrikant)
         mode='lines',  # Lijnmodus om een staaf te maken
@@ -65,7 +65,7 @@ for i, row in top_manufacturers.iterrows():
     ))
 
     # Voeg een markering toe voor de gemiddelde waarde met het aantal waarnemingen als hover-informatie
-    fig.add_trace(go.Scatter(
+    figa.add_trace(go.Scatter(
         x=[row['lasmax_dB']],  # x-positie van de markering
         y=[row['manufacturer']],  # y-positie van de markering
         mode='markers',  # Alleen markeringen (punten)
@@ -77,7 +77,7 @@ for i, row in top_manufacturers.iterrows():
     ))
 
 # Pas de layout aan voor betere zichtbaarheid van labels en de x-as
-fig.update_layout(
+figa.update_layout(
     yaxis={'tickmode': 'array'},  # Zorg ervoor dat alle fabrikanten zichtbaar zijn
     margin={"l": 200, "r": 20, "t": 50, "b": 100},  # Vergroot de marge om ruimte te maken voor labels
     width=1000,  # Pas de breedte aan om de grafiek compacter te maken
@@ -93,13 +93,13 @@ fig.update_layout(
 )
 
 # Draai de y-as labels zodat ze beter leesbaar zijn
-fig.update_layout(
+figa.update_layout(
     yaxis_tickangle=-45,  # Draai de y-as labels met -45 graden voor betere leesbaarheid
     font=dict(size=12)  # Verklein het lettertype van de labels om ze beter leesbaar te maken
 )
 
 # Toon de grafiek in de Streamlit interface
-st.plotly_chart(fig1)
+st.plotly_chart(figa)
 
 
 ######################################################################################
@@ -119,7 +119,7 @@ avg_sound_per_boeing_model.columns = ['model', 'lasmax_dB', 'min_lasmax_dB', 'ma
 avg_sound_per_boeing_model = avg_sound_per_boeing_model.sort_values(by='lasmax_dB', ascending=False)
 
 # Maak een lege figuur aan voor de grafiek
-fig2 = go.Figure()
+fig = go.Figure()
 
 # Voeg een enkele staaf toe die begint bij de minimum waarde en eindigt bij de maximum waarde
 for i, row in avg_sound_per_boeing_model.iterrows():
@@ -164,7 +164,7 @@ fig.update_layout(
 
 # Toon de grafiek in de Streamlit interface
 st.title("Gemiddeld Geluidsniveau per Boeing Model")
-st.plotly_chart(fig2)
+st.plotly_chart(fig)
 
 #################################################################################################################
 
