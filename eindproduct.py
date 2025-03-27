@@ -532,7 +532,3 @@ with tab3:
    
    # Toon de chart
    st.plotly_chart(fig_weekday_chart, use_container_width=True, key="weekday_chart")
-
-with tab4: 
- st.header("Zach")
-    st.write("Zach visualisaties")
