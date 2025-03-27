@@ -90,20 +90,8 @@ st.plotly_chart(fig)
 
 
 ######################################################################################
-# Filter de rijen waar 'boeing' in de 'type' kolom staat
-boeing_data = data[data['type'].str.contains('Boeing', case=False, na=False)]
-
-# Groepeer het type door alleen het eerste deel van het model te behouden (zoals 'Boeing 777')
-boeing_data['model'] = boeing_data['type'].str.extract(r'(Boeing \d+)')
-
-# Groepeer nu op het nieuwe 'model' en bereken het gemiddelde geluidsniveau per model
-avg_sound_per_boeing_model = boeing_data.groupby('model')['lasmax_dB'].agg(['mean', 'min', 'max']).reset_index()
-
-# Hernoem kolommen voor duidelijkheid
-avg_sound_per_boeing_model.columns = ['model', 'lasmax_dB', 'min_lasmax_dB', 'max_lasmax_dB']
-
-# Sorteer op gemiddeld geluidsniveau
-avg_sound_per_boeing_model = avg_sound_per_boeing_model.sort_values(by='lasmax_dB', ascending=False)
+# Voeg het aantal waarnemingen per Boeing-model toe
+boeing_model_counts = boeing_data['model'].value_counts()
 
 # Maak een lege figuur aan voor de grafiek
 fig = go.Figure()
@@ -112,19 +100,22 @@ fig = go.Figure()
 for i, row in avg_sound_per_boeing_model.iterrows():
     fig.add_trace(go.Scatter(
         x=[row['min_lasmax_dB'], row['max_lasmax_dB']],  # x-waarden van de staaf (min naar max)
-        y=[row['model'], row['model']],  # y-waarden zijn constant (voor elke fabrikant)
+        y=[row['model'], row['model']],  # y-waarden zijn constant (voor elk model)
         mode='lines',  # Lijnmodus om een staaf te maken
         line=dict(color='lightblue', width=6),  # Lichtblauwe lijn voor de staaf
         name=row['model']
     ))
 
-    # Voeg een markering toe voor de gemiddelde waarde
+    # Voeg een markering toe voor de gemiddelde waarde met het aantal waarnemingen als hover-informatie
     fig.add_trace(go.Scatter(
         x=[row['lasmax_dB']],  # x-positie van de markering
         y=[row['model']],  # y-positie van de markering
-        mode='markers',  # Markeringen (punt)
+        mode='markers',  # Alleen markeringen (punten)
         marker=dict(color='blue', size=10, symbol='circle'),  # Markering in blauw
         name=f"Gemiddeld: {row['model']}",
+        hoverinfo='text',  # Zet hover-informatie aan
+        hovertext=[f"Gemiddeld: {row['lasmax_dB']:.2f} dB<br>Waarnemingen: {boeing_model_counts[row['model']]}"],  # Hover tekst met gemiddelde en aantal waarnemingen
+        showlegend=False  # Verberg de legenda voor de markeringen
     ))
 
 # Pas de layout aan voor betere zichtbaarheid van labels en de x-as
