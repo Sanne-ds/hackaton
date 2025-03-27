@@ -51,13 +51,16 @@ for i, row in top_manufacturers.iterrows():
         name=row['manufacturer']
     ))
 
-    # Voeg een markering toe voor de gemiddelde waarde
+    # Voeg een markering toe voor de gemiddelde waarde met het aantal waarnemingen als hover-informatie
     fig.add_trace(go.Scatter(
         x=[row['lasmax_dB']],  # x-positie van de markering
         y=[row['manufacturer']],  # y-positie van de markering
-        mode='markers',  # Markeringen (punt)
+        mode='markers',  # Alleen markeringen (punten)
         marker=dict(color='blue', size=10, symbol='circle'),  # Markering in blauw
         name=f"Gemiddeld: {row['manufacturer']}",
+        hoverinfo='text',  # Zet hover-informatie aan
+        hovertext=[f"Gemiddeld: {row['lasmax_dB']:.2f} dB<br>Waarnemingen: {row['count']}"],  # Hover tekst met gemiddelde en aantal waarnemingen
+        showlegend=False  # Verberg de legenda voor de markeringen
     ))
 
 # Pas de layout aan voor betere zichtbaarheid van labels en de x-as
@@ -72,7 +75,6 @@ fig.update_layout(
     xaxis=dict(
         range=[top_manufacturers['min'].min() - 5, top_manufacturers['max'].max() + 5]  # Stel de x-as limieten in zodat alles zichtbaar is
     ),
-    # Verwijder de widgets aan de rechterkant (sidebars of andere elementen)
     paper_bgcolor='white',  # Achtergrondkleur instellen als wit
     plot_bgcolor='white',  # Achtergrondkleur grafiek instellen als wit
 )
@@ -85,6 +87,7 @@ fig.update_layout(
 
 # Toon de grafiek in de Streamlit interface
 st.plotly_chart(fig)
+
 
 ######################################################################################
 # Filter de rijen waar 'boeing' in de 'type' kolom staat
