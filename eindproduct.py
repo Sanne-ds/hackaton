@@ -11,7 +11,7 @@ import seaborn as sns
 st.title("Hackaton")
 
 # Maak twee tabbladen
-tab1, tab2 = st.tabs(["Vliegtuigfabrikanten", "Passagiers en vracht"])
+tab1, tab2, tab3 = st.tabs(["Vliegtuigfabrikanten", "Passagiers en vracht", "Test"])
 
 # Inhoud voor Tabblad 1
 with tab1:
@@ -479,7 +479,10 @@ with tab2:
    st.plotly_chart(fig_box_plot, use_container_width=True, key="box_plot")
    
    
-   # Line Chart: Tijdreeksanalyse van gemiddeld geluid
+
+
+with tab3:
+    # Line Chart: Tijdreeksanalyse van gemiddeld geluid
    st.subheader("Lijngrafiek: Tijdreeksanalyse van Gemiddeld Geluid")
    filtered_data['date'] = filtered_data['time'].dt.date
    time_series = filtered_data.groupby('date').agg(Gemiddeld_SEL_dB=('SEL_dB', 'mean')).reset_index()
@@ -529,4 +532,3 @@ with tab2:
    
    # Toon de chart
    st.plotly_chart(fig_weekday_chart, use_container_width=True, key="weekday_chart")
-     
