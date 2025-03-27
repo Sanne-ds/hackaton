@@ -542,6 +542,9 @@ with tab3:
    st.plotly_chart(fig_weekday_chart, use_container_width=True, key="weekday_chart")
 
 with tab4:
+  # Titel van de Streamlit app
+ st.title("Geluidsdetectie in Kudelstaartseweg")
+ 
  # -------------------------------------------------------------------------
  # 1) READ CSVs WITH STREAMLIT CACHE
  # -------------------------------------------------------------------------
