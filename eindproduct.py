@@ -481,7 +481,7 @@ fig_box_plot = px.box(
     category_orders={'categorie': category_order}  # Hier stel je de volgorde van de categorieën in
 )
 
-st.plotly_chart(fig_box_plot, use_container_width=True, key="box_plot")   
+st.plotly_chart(fig_box_plot, use_container_width=True, key="box_plot")   
 
 with tab3:
     # Line Chart: Tijdreeksanalyse van gemiddeld geluid
