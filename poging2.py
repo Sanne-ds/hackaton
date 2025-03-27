@@ -131,5 +131,5 @@ fig.update_layout(
     yaxis={'tickmode': 'array'},  # Zorg ervoor dat de y-as met alle labels correct wordt weergegeven
 )
 
-# Toon de grafiek
-fig.show()
+st.title("Gemiddeld Geluidsniveau per Boeing Model")
+st.plotly_chart(fig)
