@@ -11,7 +11,7 @@ import seaborn as sns
 st.title("Hackaton 👩🏼‍✈️👨🏻‍✈️👨🏼‍✈️🧑🏻‍✈️")
 
 # Maak twee tabbladen
-tab1, tab2, tab3, tab4 = st.tabs(["🛬🏭Vliegtuigfabrikanten", "🧳Passagiers en vracht", "🎧Geluidsoverzicht", "👂Geluidsdetectie"])
+tab1, tab2, tab3, tab4 = st.tabs(["🛬🏭Vliegtuigfabrikanten", "🧳🚶🏽‍♀️‍➡️Passagiers en vracht", "🎧Geluidsoverzicht", "👂Geluidsdetectie"])
 
 # Inhoud voor Tabblad 1
 with tab1:
