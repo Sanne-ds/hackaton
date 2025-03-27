@@ -83,3 +83,54 @@ fig.update_layout(
 # Toon de grafiek in de Streamlit interface
 st.plotly_chart(fig)
 
+import plotly.graph_objects as go
+import streamlit as st
+
+# Maak een lege figuur aan voor de grafiek
+fig = go.Figure()
+
+# Voeg een enkele staaf toe die begint bij de minimum waarde en eindigt bij de maximum waarde
+for i, row in avg_sound_per_boeing_model.iterrows():
+    fig.add_trace(go.Scatter(
+        x=[row['min_lasmax_dB'], row['max_lasmax_dB']],  # x-waarden van de staaf (min naar max)
+        y=[row['model'], row['model']],  # y-waarden zijn constant (voor elk Boeing-model)
+        mode='lines',  # Lijnmodus om een staaf te maken
+        line=dict(color='lightblue', width=6),  # Lichtblauwe lijn voor de staaf
+        name=row['model']
+    ))
+
+    # Voeg een markering toe voor de gemiddelde waarde
+    fig.add_trace(go.Scatter(
+        x=[row['lasmax_dB']],  # x-positie van de markering
+        y=[row['model']],  # y-positie van de markering
+        mode='markers',  # Markeringen (punt)
+        marker=dict(color='blue', size=10, symbol='circle'),  # Markering in blauw
+        name=f"Gemiddeld: {row['model']}",
+    ))
+
+# Pas de layout aan voor betere zichtbaarheid van labels en de x-as
+fig.update_layout(
+    yaxis={'tickmode': 'array'},  # Zorg ervoor dat alle Boeing-modellen zichtbaar zijn
+    margin={"l": 200, "r": 20, "t": 50, "b": 100},  # Vergroot de marge om ruimte te maken voor labels
+    width=1000,  # Pas de breedte aan om de grafiek compacter te maken
+    height=600,  # Pas de hoogte aan om de grafiek compacter te maken
+    xaxis_title='Geluidniveaus (dB)',  # Toevoegen van titel aan de x-as
+    yaxis_title='Boeing Model',  # Toevoegen van titel aan de y-as
+    showlegend=False,  # Verwijder de legenda aan de rechterkant
+    xaxis=dict(
+        range=[avg_sound_per_boeing_model['min_lasmax_dB'].min() - 5, avg_sound_per_boeing_model['max_lasmax_dB'].max() + 5]  # Stel de x-as limieten in zodat alles zichtbaar is
+    ),
+    # Verwijder de widgets aan de rechterkant (sidebars of andere elementen)
+    paper_bgcolor='white',  # Achtergrondkleur instellen als wit
+    plot_bgcolor='white',  # Achtergrondkleur grafiek instellen als wit
+)
+
+# Draai de y-as labels zodat ze beter leesbaar zijn
+fig.update_layout(
+    yaxis_tickangle=-45,  # Draai de y-as labels met -45 graden voor betere leesbaarheid
+    font=dict(size=12)  # Verklein het lettertype van de labels om ze beter leesbaar te maken
+)
+
+# Toon de grafiek in de Streamlit interface
+st.plotly_chart(fig)
+
