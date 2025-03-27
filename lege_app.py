@@ -11,8 +11,9 @@ tab1, tab2 = st.tabs(["Tabblad 1", "Tabblad 2"])
 
 # Inhoud voor Tabblad 1
 with tab1:
+
  # Titel van de Streamlit app
-st.title("Luidste Vliegtuigfabrikanten")
+ st.title("Luidste Vliegtuigfabrikanten")
 
 # Laad de dataset
 data = pd.read_csv('data_klein.csv')
