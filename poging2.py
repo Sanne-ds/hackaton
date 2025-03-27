@@ -51,16 +51,13 @@ for i, row in top_manufacturers.iterrows():
         name=row['manufacturer']
     ))
 
-    # Voeg een markering toe voor de gemiddelde waarde met het aantal waarnemingen
+    # Voeg een markering toe voor de gemiddelde waarde
     fig.add_trace(go.Scatter(
         x=[row['lasmax_dB']],  # x-positie van de markering
         y=[row['manufacturer']],  # y-positie van de markering
-        mode='markers+text',  # Markeringen (punt) en tekst (aantal waarnemingen)
+        mode='markers',  # Markeringen (punt)
         marker=dict(color='blue', size=10, symbol='circle'),  # Markering in blauw
         name=f"Gemiddeld: {row['manufacturer']}",
-        text=[f"Gemiddeld: {row['lasmax_dB']:.2f} dB<br>Waarnemingen: {row['count']}"],  # Voeg het aantal waarnemingen toe
-        textposition='top center',  # Plaats de tekst boven de markering
-        showlegend=False  # Verberg de legenda voor de markeringen
     ))
 
 # Pas de layout aan voor betere zichtbaarheid van labels en de x-as
@@ -75,6 +72,7 @@ fig.update_layout(
     xaxis=dict(
         range=[top_manufacturers['min'].min() - 5, top_manufacturers['max'].max() + 5]  # Stel de x-as limieten in zodat alles zichtbaar is
     ),
+    # Verwijder de widgets aan de rechterkant (sidebars of andere elementen)
     paper_bgcolor='white',  # Achtergrondkleur instellen als wit
     plot_bgcolor='white',  # Achtergrondkleur grafiek instellen als wit
 )
@@ -96,6 +94,13 @@ boeing_data = data[data['type'].str.contains('Boeing', case=False, na=False)]
 boeing_data['model'] = boeing_data['type'].str.extract(r'(Boeing \d+)')
 
 # Groepeer nu op het nieuwe 'model' en bereken het gemiddelde geluidsniveau per model
+avg_sound_per_boeing_model = boeing_data.groupby('model')['lasmax_dB'].mean().sort_values(ascending=False).reset_index()
+
+# Toon de gefilterde en gegroepeerde data
+print(avg_sound_per_boeing_model)
+
+
+# Bereken gemiddelde, minimum en maximum per Boeing-model
 avg_sound_per_boeing_model = boeing_data.groupby('model')['lasmax_dB'].agg(['mean', 'min', 'max']).reset_index()
 
 # Hernoem kolommen voor duidelijkheid
@@ -104,50 +109,27 @@ avg_sound_per_boeing_model.columns = ['model', 'lasmax_dB', 'min_lasmax_dB', 'ma
 # Sorteer op gemiddeld geluidsniveau
 avg_sound_per_boeing_model = avg_sound_per_boeing_model.sort_values(by='lasmax_dB', ascending=False)
 
-# Maak een lege figuur aan voor de grafiek
-fig = go.Figure()
+# Bereken de foutmarges voor de error bars
+avg_sound_per_boeing_model['error_x'] = avg_sound_per_boeing_model['max_lasmax_dB'] - avg_sound_per_boeing_model['lasmax_dB']
+avg_sound_per_boeing_model['error_x_minus'] = avg_sound_per_boeing_model['lasmax_dB'] - avg_sound_per_boeing_model['min_lasmax_dB']
 
-# Voeg een enkele staaf toe die begint bij de minimum waarde en eindigt bij de maximum waarde
-for i, row in avg_sound_per_boeing_model.iterrows():
-    fig.add_trace(go.Scatter(
-        x=[row['min_lasmax_dB'], row['max_lasmax_dB']],  # x-waarden van de staaf (min naar max)
-        y=[row['model'], row['model']],  # y-waarden zijn constant (voor elke fabrikant)
-        mode='lines',  # Lijnmodus om een staaf te maken
-        line=dict(color='lightblue', width=6),  # Lichtblauwe lijn voor de staaf
-        name=row['model']
-    ))
+# Maak een barplot van het gemiddelde geluidsniveau per gegroepeerd Boeing-model
+fig = px.bar(avg_sound_per_boeing_model, 
+             x='lasmax_dB', 
+             y='model', 
+             labels={'lasmax_dB': 'Gemiddeld Geluidsniveau (dB)', 'model': 'Boeing Model'},
+             title="Gemiddeld Geluidsniveau per Groep Boeing Model",
+             orientation='h')
 
-    # Voeg een markering toe voor de gemiddelde waarde
-    fig.add_trace(go.Scatter(
-        x=[row['lasmax_dB']],  # x-positie van de markering
-        y=[row['model']],  # y-positie van de markering
-        mode='markers',  # Markeringen (punt)
-        marker=dict(color='blue', size=10, symbol='circle'),  # Markering in blauw
-        name=f"Gemiddeld: {row['model']}",
-    ))
-
-# Pas de layout aan voor betere zichtbaarheid van labels en de x-as
+# Pas de layout aan voor een betere weergave
 fig.update_layout(
-    yaxis={'tickmode': 'array'},  # Zorg ervoor dat alle Boeing-modellen zichtbaar zijn
-    margin={"l": 200, "r": 20, "t": 50, "b": 100},  # Vergroot de marge om ruimte te maken voor labels
-    width=1000,  # Pas de breedte aan om de grafiek compacter te maken
-    height=600,  # Pas de hoogte aan om de grafiek compacter te maken
-    xaxis_title='Geluidniveaus (dB)',  # Toevoegen van titel aan de x-as
-    yaxis_title='Boeing Model',  # Toevoegen van titel aan de y-as
-    showlegend=False,  # Verwijder de legenda aan de rechterkant
-    xaxis=dict(
-        range=[avg_sound_per_boeing_model['min_lasmax_dB'].min() - 5, avg_sound_per_boeing_model['max_lasmax_dB'].max() + 5]  # Stel de x-as limieten in zodat alles zichtbaar is
-    ),
-    paper_bgcolor='white',  # Achtergrondkleur instellen als wit
-    plot_bgcolor='white',  # Achtergrondkleur grafiek instellen als wit
+    width=800,  # Pas de breedte aan
+    height=600,  # Pas de hoogte aan
+    margin={"l": 150, "r": 20, "t": 50, "b": 50},  # Voeg marges toe voor leesbaarheid
+    xaxis_title='Gemiddeld Geluidsniveau (dB)',  # Titel voor de x-as
+    yaxis_title='Boeing Model',  # Titel voor de y-as
+    yaxis={'tickmode': 'array'},  # Zorg ervoor dat de y-as met alle labels correct wordt weergegeven
 )
 
-# Draai de y-as labels zodat ze beter leesbaar zijn
-fig.update_layout(
-    yaxis_tickangle=-45,  # Draai de y-as labels met -45 graden voor betere leesbaarheid
-    font=dict(size=12)  # Verklein het lettertype van de labels om ze beter leesbaar te maken
-)
-
-# Toon de grafiek in de Streamlit interface
 st.title("Gemiddeld Geluidsniveau per Boeing Model")
 st.plotly_chart(fig)
