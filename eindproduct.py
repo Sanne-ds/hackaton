@@ -11,7 +11,7 @@ import seaborn as sns
 st.title("Hackaton")
 
 # Maak twee tabbladen
-tab1, tab2, tab3 = st.tabs(["Vliegtuigfabrikanten", "Passagiers en vracht", "Geluidsoverzicht"])
+tab1, tab2, tab3, tab4 = st.tabs(["Vliegtuigfabrikanten", "Passagiers en vracht", "Geluidsoverzicht", "Geluidsdetectie"])
 
 # Inhoud voor Tabblad 1
 with tab1:
@@ -532,3 +532,6 @@ with tab3:
    
    # Toon de chart
    st.plotly_chart(fig_weekday_chart, use_container_width=True, key="weekday_chart")
+
+with tab4:
+ 
