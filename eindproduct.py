@@ -2,153 +2,176 @@ import streamlit as st
 import plotly.graph_objects as go
 import plotly.express as px
 import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
 import requests
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 
-# Tabbladen maken
-tab1, tab2 = st.tabs(["Fabrikanten & Boeing Modellen", "Marijn's Visualisaties"])
+# Titel van de Streamlit app
+st.title("Hackaton")
 
-# Tabblad 1: Jouw visualisaties
+# Maak twee tabbladen
+tab1, tab2 = st.tabs(["Vliegtuigfabrikanten", "Tabblad 2"])
+
+# Inhoud voor Tabblad 1
 with tab1:
-    st.title("Luidste Vliegtuigfabrikanten Analyse")
 
-    # Laad de dataset
-    data = pd.read_csv('data_klein.csv')
+ # Titel van de Streamlit app
+ st.title("Luidste Vliegtuigfabrikanten")
 
-    # Voeg een nieuwe kolom 'manufacturer' toe met de eerste woordgroep uit 'type'
-    data['manufacturer'] = data['type'].str.split().str[0]
-    # Voeg een nieuwe kolom 'model' toe door het tweede woord uit de kolom 'type' te halen
-    data['model'] = data['type'].str.split().str[1]
+# Laad de dataset
+data = pd.read_csv('data_klein.csv')
 
-    # Tel het aantal waarnemingen per fabrikant
-    manufacturer_counts = data['manufacturer'].value_counts()
+# Voeg een nieuwe kolom 'manufacturer' toe met de eerste woordgroep uit 'type'
+data['manufacturer'] = data['type'].str.split().str[0]
+# Voeg een nieuwe kolom 'model' toe door het tweede woord uit de kolom 'type' te halen
+data['model'] = data['type'].str.split().str[1]
 
-    # Filter alleen de fabrikanten die meer dan 5 keer zijn waargenomen
-    valid_manufacturers = manufacturer_counts[manufacturer_counts > 5].index
+# Tel het aantal waarnemingen per fabrikant
+manufacturer_counts = data['manufacturer'].value_counts()
 
-    # Filter de dataset op de fabrikanten die meer dan 5 keer zijn waargenomen
-    filtered_data = data[data['manufacturer'].isin(valid_manufacturers)]
+# Filter alleen de fabrikanten die meer dan 5 keer zijn waargenomen
+valid_manufacturers = manufacturer_counts[manufacturer_counts > 5].index
 
-    # Bereken het gemiddelde geluidsniveau per fabrikant
-    avg_sound_per_manufacturer = filtered_data.groupby('manufacturer')['lasmax_dB'].mean().sort_values(ascending=False).reset_index()
+# Filter de dataset op de fabrikanten die meer dan 5 keer zijn waargenomen
+filtered_data = data[data['manufacturer'].isin(valid_manufacturers)]
 
-    # Voeg het aantal waarnemingen per fabrikant toe aan de dataset
-    avg_sound_per_manufacturer['count'] = avg_sound_per_manufacturer['manufacturer'].map(manufacturer_counts)
+# Bereken het gemiddelde geluidsniveau per fabrikant
+avg_sound_per_manufacturer = filtered_data.groupby('manufacturer')['lasmax_dB'].mean().sort_values(ascending=False).reset_index()
 
-    # Selecteer de top 20 luidste fabrikanten
-    top_manufacturers = avg_sound_per_manufacturer.head(20)
+# Voeg het aantal waarnemingen per fabrikant toe aan de dataset
+avg_sound_per_manufacturer['count'] = avg_sound_per_manufacturer['manufacturer'].map(manufacturer_counts)
 
-    # Bereken de minimale en maximale waarde per fabrikant
-    min_max_per_manufacturer = filtered_data.groupby('manufacturer')['lasmax_dB'].agg(['min', 'max']).reset_index()
+# Selecteer de top 20 luidste fabrikanten
+top_manufacturers = avg_sound_per_manufacturer.head(20)
 
-    # Voeg de minimale en maximale waarden toe aan de top_manufacturers dataframe
-    top_manufacturers = top_manufacturers.merge(min_max_per_manufacturer[['manufacturer', 'min', 'max']], on='manufacturer')
+# Bereken de minimale en maximale waarde per fabrikant
+min_max_per_manufacturer = filtered_data.groupby('manufacturer')['lasmax_dB'].agg(['min', 'max']).reset_index()
 
-    # Maak een lege figuur aan voor de grafiek
-    fig = go.Figure()
+# Voeg de minimale en maximale waarden toe aan de top_manufacturers dataframe
+top_manufacturers = top_manufacturers.merge(min_max_per_manufacturer[['manufacturer', 'min', 'max']], on='manufacturer')
 
-    # Voeg een enkele staaf toe die begint bij de minimum waarde en eindigt bij de maximum waarde
-    for i, row in top_manufacturers.iterrows():
-        fig.add_trace(go.Scatter(
-            x=[row['min'], row['max']],
-            y=[row['manufacturer'], row['manufacturer']],
-            mode='lines',
-            line=dict(color='lightblue', width=6),
-            name=row['manufacturer']
-        ))
+# Maak een lege figuur aan voor de grafiek
+fig = go.Figure()
 
-        # Voeg een markering toe voor de gemiddelde waarde
-        fig.add_trace(go.Scatter(
-            x=[row['lasmax_dB']],
-            y=[row['manufacturer']],
-            mode='markers',
-            marker=dict(color='blue', size=10, symbol='circle'),
-            name=f"Gemiddeld: {row['manufacturer']}",
-            hoverinfo='text',
-            hovertext=[f"Gemiddeld: {row['lasmax_dB']:.2f} dB<br>Waarnemingen: {row['count']}"],
-            showlegend=False
-        ))
+# Voeg een enkele staaf toe die begint bij de minimum waarde en eindigt bij de maximum waarde
+for i, row in top_manufacturers.iterrows():
+    fig.add_trace(go.Scatter(
+        x=[row['min'], row['max']],  # x-waarden van de staaf (min naar max)
+        y=[row['manufacturer'], row['manufacturer']],  # y-waarden zijn constant (voor elke fabrikant)
+        mode='lines',  # Lijnmodus om een staaf te maken
+        line=dict(color='lightblue', width=6),  # Lichtblauwe lijn voor de staaf
+        name=row['manufacturer']
+    ))
 
-    # Pas de layout aan
-    fig.update_layout(
-        yaxis={'tickmode': 'array'},
-        margin={"l": 200, "r": 20, "t": 50, "b": 100},
-        width=1000,
-        height=600,
-        xaxis_title='Geluidniveaus (dB)',
-        yaxis_title='Fabrikant',
-        showlegend=False,
-        xaxis=dict(
-            range=[top_manufacturers['min'].min() - 5, top_manufacturers['max'].max() + 5]
-        ),
-        paper_bgcolor='white',
-        plot_bgcolor='white',
-    )
+    # Voeg een markering toe voor de gemiddelde waarde met het aantal waarnemingen als hover-informatie
+    fig.add_trace(go.Scatter(
+        x=[row['lasmax_dB']],  # x-positie van de markering
+        y=[row['manufacturer']],  # y-positie van de markering
+        mode='markers',  # Alleen markeringen (punten)
+        marker=dict(color='blue', size=10, symbol='circle'),  # Markering in blauw
+        name=f"Gemiddeld: {row['manufacturer']}",
+        hoverinfo='text',  # Zet hover-informatie aan
+        hovertext=[f"Gemiddeld: {row['lasmax_dB']:.2f} dB<br>Waarnemingen: {row['count']}"],  # Hover tekst met gemiddelde en aantal waarnemingen
+        showlegend=False  # Verberg de legenda voor de markeringen
+    ))
 
-    st.plotly_chart(fig)
+# Pas de layout aan voor betere zichtbaarheid van labels en de x-as
+fig.update_layout(
+    yaxis={'tickmode': 'array'},  # Zorg ervoor dat alle fabrikanten zichtbaar zijn
+    margin={"l": 200, "r": 20, "t": 50, "b": 100},  # Vergroot de marge om ruimte te maken voor labels
+    width=1000,  # Pas de breedte aan om de grafiek compacter te maken
+    height=600,  # Pas de hoogte aan om de grafiek compacter te maken
+    xaxis_title='Geluidniveaus (dB)',  # Toevoegen van titel aan de x-as
+    yaxis_title='Fabrikant',  # Toevoegen van titel aan de y-as
+    showlegend=False,  # Verwijder de legenda aan de rechterkant
+    xaxis=dict(
+        range=[top_manufacturers['min'].min() - 5, top_manufacturers['max'].max() + 5]  # Stel de x-as limieten in zodat alles zichtbaar is
+    ),
+    paper_bgcolor='white',  # Achtergrondkleur instellen als wit
+    plot_bgcolor='white',  # Achtergrondkleur grafiek instellen als wit
+)
 
-    # Boeing modellen analyse
-    st.title("Gemiddeld Geluidsniveau per Boeing Model")
+# Draai de y-as labels zodat ze beter leesbaar zijn
+fig.update_layout(
+    yaxis_tickangle=-45,  # Draai de y-as labels met -45 graden voor betere leesbaarheid
+    font=dict(size=12)  # Verklein het lettertype van de labels om ze beter leesbaar te maken
+)
 
-    # Filter de rijen waar 'boeing' in de 'type' kolom staat
-    boeing_data = data[data['type'].str.contains('Boeing', case=False, na=False)]
+# Toon de grafiek in de Streamlit interface
+st.plotly_chart(fig)
 
-    # Groepeer het type door alleen het eerste deel van het model te behouden (zoals 'Boeing 777')
-    boeing_data['model'] = boeing_data['type'].str.extract(r'(Boeing \d+)')
 
-    # Groepeer nu op het nieuwe 'model' en bereken het gemiddelde geluidsniveau per model
-    avg_sound_per_boeing_model = boeing_data.groupby('model')['lasmax_dB'].agg(['mean', 'min', 'max']).reset_index()
+######################################################################################
+# Filter de rijen waar 'boeing' in de 'type' kolom staat
+boeing_data = data[data['type'].str.contains('Boeing', case=False, na=False)]
 
-    # Hernoem kolommen voor duidelijkheid
-    avg_sound_per_boeing_model.columns = ['model', 'lasmax_dB', 'min_lasmax_dB', 'max_lasmax_dB']
+# Groepeer het type door alleen het eerste deel van het model te behouden (zoals 'Boeing 777')
+boeing_data['model'] = boeing_data['type'].str.extract(r'(Boeing \d+)')
 
-    # Sorteer op gemiddeld geluidsniveau
-    avg_sound_per_boeing_model = avg_sound_per_boeing_model.sort_values(by='lasmax_dB', ascending=False)
+# Groepeer nu op het nieuwe 'model' en bereken het gemiddelde geluidsniveau per model
+avg_sound_per_boeing_model = boeing_data.groupby('model')['lasmax_dB'].agg(['mean', 'min', 'max']).reset_index()
 
-    # Maak een lege figuur aan voor de grafiek
-    fig = go.Figure()
+# Hernoem kolommen voor duidelijkheid
+avg_sound_per_boeing_model.columns = ['model', 'lasmax_dB', 'min_lasmax_dB', 'max_lasmax_dB']
 
-    # Voeg een enkele staaf toe die begint bij de minimum waarde en eindigt bij de maximum waarde
-    for i, row in avg_sound_per_boeing_model.iterrows():
-        fig.add_trace(go.Scatter(
-            x=[row['min_lasmax_dB'], row['max_lasmax_dB']],
-            y=[row['model'], row['model']],
-            mode='lines',
-            line=dict(color='lightblue', width=6),
-            name=row['model']
-        ))
+# Sorteer op gemiddeld geluidsniveau
+avg_sound_per_boeing_model = avg_sound_per_boeing_model.sort_values(by='lasmax_dB', ascending=False)
 
-        # Voeg een markering toe voor de gemiddelde waarde
-        fig.add_trace(go.Scatter(
-            x=[row['lasmax_dB']],
-            y=[row['model']],
-            mode='markers',
-            marker=dict(color='blue', size=10, symbol='circle'),
-            name=f"Gemiddeld: {row['model']}",
-        ))
+# Maak een lege figuur aan voor de grafiek
+fig = go.Figure()
 
-    # Pas de layout aan
-    fig.update_layout(
-        yaxis={'tickmode': 'array'},
-        margin={"l": 200, "r": 20, "t": 50, "b": 100},
-        width=1000,
-        height=600,
-        xaxis_title='Geluidniveaus (dB)',
-        yaxis_title='Boeing Model',
-        showlegend=False,
-        xaxis=dict(
-            range=[avg_sound_per_boeing_model['min_lasmax_dB'].min() - 5, avg_sound_per_boeing_model['max_lasmax_dB'].max() + 5]
-        ),
-        paper_bgcolor='white',
-        plot_bgcolor='white',
-    )
+# Voeg een enkele staaf toe die begint bij de minimum waarde en eindigt bij de maximum waarde
+for i, row in avg_sound_per_boeing_model.iterrows():
+    fig.add_trace(go.Scatter(
+        x=[row['min_lasmax_dB'], row['max_lasmax_dB']],  # x-waarden van de staaf (min naar max)
+        y=[row['model'], row['model']],  # y-waarden zijn constant (voor elke fabrikant)
+        mode='lines',  # Lijnmodus om een staaf te maken
+        line=dict(color='lightblue', width=6),  # Lichtblauwe lijn voor de staaf
+        name=row['model']
+    ))
 
-    st.plotly_chart(fig)
+    # Voeg een markering toe voor de gemiddelde waarde
+    fig.add_trace(go.Scatter(
+        x=[row['lasmax_dB']],  # x-positie van de markering
+        y=[row['model']],  # y-positie van de markering
+        mode='markers',  # Markeringen (punt)
+        marker=dict(color='blue', size=10, symbol='circle'),  # Markering in blauw
+        name=f"Gemiddeld: {row['model']}",
+    ))
 
-# Tabblad 2: Marijn's visualisaties
+# Pas de layout aan voor betere zichtbaarheid van labels en de x-as
+fig.update_layout(
+    yaxis={'tickmode': 'array'},  # Zorg ervoor dat alle Boeing-modellen zichtbaar zijn
+    margin={"l": 200, "r": 20, "t": 50, "b": 100},  # Vergroot de marge om ruimte te maken voor labels
+    width=1000,  # Pas de breedte aan om de grafiek compacter te maken
+    height=600,  # Pas de hoogte aan om de grafiek compacter te maken
+    xaxis_title='Geluidniveaus (dB)',  # Toevoegen van titel aan de x-as
+    yaxis_title='Boeing Model',  # Toevoegen van titel aan de y-as
+    showlegend=False,  # Verwijder de legenda aan de rechterkant
+    xaxis=dict(
+        range=[avg_sound_per_boeing_model['min_lasmax_dB'].min() - 5, avg_sound_per_boeing_model['max_lasmax_dB'].max() + 5]  # Stel de x-as limieten in zodat alles zichtbaar is
+    ),
+    paper_bgcolor='white',  # Achtergrondkleur instellen als wit
+    plot_bgcolor='white',  # Achtergrondkleur grafiek instellen als wit
+)
+
+# Draai de y-as labels zodat ze beter leesbaar zijn
+fig.update_layout(
+    yaxis_tickangle=-45,  # Draai de y-as labels met -45 graden voor betere leesbaarheid
+    font=dict(size=12)  # Verklein het lettertype van de labels om ze beter leesbaar te maken
+)
+
+# Toon de grafiek in de Streamlit interface
+st.title("Gemiddeld Geluidsniveau per Boeing Model")
+st.plotly_chart(fig)
+
+#################################################################################################################
+
+# Inhoud voor Tabblad 2
 with tab2:
-    # Cache de gegevensophaal functie om onnodige herhalingen van verzoeken te voorkomen
+    st.header("Marijn")
+# Cache de gegevensophaal functie om onnodige herhalingen van verzoeken te voorkomen
 @st.cache_data
 def fetch_data():
     url = 'https://sensornet.nl/dataserver3/event/collection/nina_events/stream?conditions%5B0%5D%5B%5D=time&conditions%5B0%5D%5B%5D=%3E%3D&conditions%5B0%5D%5B%5D=1735689600&conditions%5B1%5D%5B%5D=time&conditions%5B1%5D%5B%5D=%3C&conditions%5B1%5D%5B%5D=1742774400&conditions%5B%5D%5B%5D=label&conditions%5B%5D%5B%5D=in&conditions%5B%5D%5B%5D=21&conditions%5B%5D%5B%5D=32&conditions%5B%5D%5B%5D=33&conditions%5B%5D%5B%5D=34&args%5B%5D=aalsmeer&args%5B%5D=schiphol&fields%5B%5D=time&fields%5B%5D=location_short&fields%5B%5D=location_long&fields%5B%5D=duration&fields%5B%5D=SEL&fields%5B%5D=SELd&fields%5B%5D=SELe&fields%5B%5D=SELn&fields%5B%5D=SELden&fields%5B%5D=SEL_dB&fields%5B%5D=lasmax_dB&fields%5B%5D=callsign&fields%5B%5D=type&fields%5B%5D=altitude&fields%5B%5D=distance&fields%5B%5D=winddirection&fields%5B%5D=windspeed&fields%5B%5D=label&fields%5B%5D=hex_s&fields%5B%5D=registration&fields%5B%5D=icao_type&fields%5B%5D=serial&fields%5B%5D=operator&fields%5B%5D=tags'
@@ -507,4 +530,4 @@ fig_weekday_chart.update_layout(
 
 # Toon de chart
 st.plotly_chart(fig_weekday_chart, use_container_width=True, key="weekday_chart")
-
+  
