@@ -84,6 +84,14 @@ fig.update_layout(
 st.plotly_chart(fig)
 
 ######################################################################################
+# Laad de dataset
+data = pd.read_csv('data_klein.csv')
+
+# Filter de rijen waar 'boeing' voorkomt in de kolom 'type'
+boeing_data = data[data['type'].str.contains('Boeing', case=False, na=False)]
+
+# Toon de gefilterde data
+boeing_data.head()
 # Bereken gemiddelde, minimum en maximum per Boeing-model
 avg_sound_per_boeing_model = boeing_data.groupby('model')['lasmax_dB'].agg(['mean', 'min', 'max']).reset_index()
 
